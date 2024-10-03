@@ -3,37 +3,16 @@
 type It = Iterator<number>;
 type Ge = Generator<number>;
 
-// interface Generator<T = unknown, TReturn = any, TNext = any> extends IteratorObject<T, TReturn, TNext> {
-//     // NOTE: 'next' is defined using a tuple to ensure we report the correct assignability errors in all places.
-//     next(...[value]: [] | [TNext]): IteratorResult<T, TReturn>;
-//     return(value: TReturn): IteratorResult<T, TReturn>;
-//     throw(e: any): IteratorResult<T, TReturn>;
-//     [Symbol.iterator](): Generator<T, TReturn, TNext>;
-// }
+// 이게 well-formed iterable이라고 함. 이터러블이면서(==이터러블의 인터페이스를 가지고 있으면서==next등을 가지면서) 이터레이터이기도한.
+type WellformedIterable = IterableIterator<unknown>;
 
-// interface GeneratorFunction {
-//     /**
-//      * Creates a new Generator object.
-//      * @param args A list of arguments the function accepts.
-//      */
-//     new (...args: any[]): Generator;
-//     /**
-//      * Creates a new Generator object.
-//      * @param args A list of arguments the function accepts.
-//      */
-//     (...args: any[]): Generator;
-//     /**
-//      * The length of the arguments.
-//      */
-//     readonly length: number;
-//     /**
-//      * Returns the name of the function.
-//      */
-//     readonly name: string;
-//     /**
-//      * A reference to the prototype.
-//      */
-//     readonly prototype: Generator;
+// 야 너도 well-formed iterable이네!
+// interface Generator<T = unknown, TReturn = any, TNext = any> extends IteratorObject<T, TReturn, TNext> {
+//   // NOTE: 'next' is defined using a tuple to ensure we report the correct assignability errors in all places.
+//   next(...[value]: [] | [TNext]): IteratorResult<T, TReturn>;
+//   return(value: TReturn): IteratorResult<T, TReturn>;
+//   throw(e: any): IteratorResult<T, TReturn>;
+//   [Symbol.iterator](): Generator<T, TReturn, TNext>;
 // }
 
 // 제너레이터를 반환하는 제너레이터
