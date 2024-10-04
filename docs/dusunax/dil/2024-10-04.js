@@ -55,7 +55,6 @@ console.log(mapEntries); // key, value 반환
 
 /**
  * 커스텀 이터러블
- * 오픈소스, Web API, DOM 등에서 사용
  *
  * [Symbol.iterator]를 구현한 객체 = 이터러블
  * - symbol.iterator는 next() 메서드를 가지고 있는 객체를 반환한다.
