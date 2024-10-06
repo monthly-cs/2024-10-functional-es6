@@ -28,7 +28,10 @@ console.log(add5(2));
 // 이터러블/이터레이터 프로토콜
 const arr2 = [1, 2, 3];
 let iter2 = arr2[Symbol.iterator]();
-iter2.next();
+console.log(iter2.next());
+console.log(iter2.next());
+console.log(iter2.next());
+console.log(iter2.next());
 
 const iterable = {
   [Symbol.iterator]() {
