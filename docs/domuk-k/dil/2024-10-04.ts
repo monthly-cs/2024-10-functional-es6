@@ -1,3 +1,4 @@
+// 일관된 인터페이스 (Array, Map, Set 모두 통합하는)
 const myMap = <T, U>(callbackFn: (item: T) => U, arr: Iterable<T>): U[] => {
   const result: U[] = [];
   for (const item of arr) {
@@ -44,22 +45,60 @@ mymapFromPrototype(new Set([1, 2, 3]), (x) => x * 2); // number[]
 
 function myReduce(
   callbackFn: (acc: number, cur: number) => number,
-  arr: Iterable<number>
-): number;
-function myReduce<T, U>(
-  callbackFn: (acc: U, cur: T) => U,
-  initialValue: U,
-  arr?: Iterable<T>
-) {
-  if (!arr) {
-    // then initialValue is iterable, arr to be first of the iterator
-    arr = initialValue[Symbol.iterator]();
-    initialValue = arr?.next().value;
-  }
-
+  iterable: Iterable<number>
+): number {
+  const iter = iterable[Symbol.iterator]();
+  const initialValue = iter.next().value;
   let acc = initialValue;
-  for (const cur of arr) {
+  for (const cur of iter) {
     acc = callbackFn(acc, cur);
   }
   return acc;
 }
+function myReduce<T, U>(
+  callbackFn: (acc: U, cur: T) => U,
+  initialValue: U,
+  iterable: Iterable<T>
+) {
+  if (!iterable) {
+    // then initialValue is iterable, arr to be first of the iterator
+    iterable = initialValue[Symbol.iterator]();
+    initialValue = iterable?.[Symbol.iterator]().next().value;
+  }
+
+  let acc = initialValue;
+  for (const cur of iterable) {
+    acc = callbackFn(acc, cur);
+  }
+  return acc;
+}
+
+const iterable0: Iterable<string> = '123';
+const iterable1: Iterable<number> = [1, 2, 3];
+const iterable2: Iterable<number> = new Set([1, 2, 3]);
+const iterable3: Iterable<[string, number]> = new Map([
+  ['a', 1],
+  ['b', 2],
+  ['c', 3],
+]);
+
+const iterable4: Iterable<number> = {
+  [Symbol.iterator]: function* () {
+    yield 1;
+    yield 2;
+    yield 3;
+  },
+};
+console.log([...iterable3]);
+for (const x of iterable3) console.log(x);
+
+const iterable5: Iterable<number> = {
+  [Symbol.iterator]: function () {
+    let i = 1;
+    return {
+      next: () => ({ value: i++, done: i > 4 }),
+    };
+  },
+};
+console.log([...iterable5]);
+for (const x of iterable5) console.log(x);
