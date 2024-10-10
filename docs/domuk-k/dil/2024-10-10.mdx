@@ -1,0 +1,146 @@
+섹션5,6,7 수강 후
+
+# 다형성이 높다는 의미
+
+#### 강의에서 말하는 다형성이 높다는 의미는 무엇인가?
+
+섹션8: Array.prototype.join보다 다형성이 높은 join 함수
+
+join은 "시퀀스를 연결시켜 하나의 값으로 만드는 연산"이라고 하자.
+Array.prototype.join은 어떤 타입의 데이터에 자신의 연산을 수행할 수 있지?
+
+먼저 join이 될 만한, 시퀀스라고 할 만한 데이터 타입들을 보자.
+
+```ts
+const iterable_string: string = 'apple'; // Iterable<string>
+const iterable_array: Array<number> = [1, 2, 3]; // Iterable<number>
+const array_like: ArrayLike<string> = {
+  // ArrayLike<string>
+  0: 'ar',
+  1: 'ray',
+  2: 'li',
+  3: 'ke',
+  length: 4,
+};
+const iterable_map = new Map([
+  // Iterable<[string, number]>
+  ['a', 1],
+  ['b', 2],
+  ['c', 3],
+]);
+const iterable_set = new Set(['a', 'b', 'c']); // Iterable<string>
+const iterable_arguments = (function (..._: string[]) {
+  return arguments;
+})('a', 'r', 'g', 's'); // Iterable<string>
+const iterable_generator = (function* () {
+  //  Generator<1 | 2 | 3, void, unknown> or Iterable<number>
+  yield 1;
+  yield 2;
+  yield 3;
+})();
+```
+
+Array.prototype.join을 이용해서 각 시퀀스를 연결시켜 하나의 값으로 만들어보자.
+
+```ts
+const join_string = Array.prototype.join.bind(iterable_string);
+const join_array = Array.prototype.join.bind(iterable_array);
+const join_map = Array.prototype.join.bind(iterable_map);
+const join_set = Array.prototype.join.bind(iterable_set);
+const join_arguments = Array.prototype.join.bind(iterable_arguments);
+const join_generator = Array.prototype.join.bind(iterable_generator);
+const join_array_like = Array.prototype.join.bind(array_like);
+
+console.log('string: ', join_string('-')); // string:  a-p-p-l-e
+console.log('array: ', join_array('-')); // array:  1-2-3
+console.log('map: ', join_map('-')); // map:
+console.log('set: ', join_set('-')); // set:
+console.log('arguments: ', join_arguments('-')); // arguments:  a-r-g-s
+console.log('generator: ', join_generator('-')); // generator:
+console.log('array_like: ', join_array_like('-')); // array_like:  ar-ray-li-ke
+```
+
+map, set, generator에 대해서는 빈 문자열이 콘솔로 출력되고, 에러도 발생하지 않는다.
+array_like에 대해서는 문자열이 콘솔로 출력된다.
+이유는 뭘까? Array.prototype.join은 순회하면서 각 요소에 접근할 때 0부터 length-1까지의 숫자를 키로 하여 접근하기 때문이다.
+
+대략 아래같은 동작을 하고 있는 것이다.
+
+```js
+Array.prototype.pseudoJoin = function () {
+  let result = '';
+  for (let i = 0; i < this.length; i++) {
+    result += this[i];
+  }
+  return result;
+};
+```
+
+<details>
+    <summary>Array.prototype.join의 동작 원리 - ECMAScript 스펙</summary>
+
+    Array.prototype.join의 [스펙](https://tc39.es/ecma262/#sec-array.prototype.join)을 보면
+    이런 내용을 볼 수 있다.
+
+    > Repeat, while k < len,
+    > a. If k > 0, set R to the string-concatenation of R and sep.
+    > b. Let element be ? Get(O, ! ToString(𝔽(k))).
+
+    즉, join은 그 스펙에 따르면 인자로 온 객체의 length를 가지고 0부터 length까지 순회하면서
+    각 요소를 문자열로 변환하고, 이를 이어붙이는 연산을 한다.
+
+</details>
+
+강의에서 구현한 "다형성이 더 높은" join 함수는 더 많은 타입의 데이터, 시퀀스를 더 다양한 방식으로 표현한 다른 데이터타입에 대해서도 자신의 연산을 수행할 수 있다.
+
+```ts
+const join = <T>(sep = ',', iter: Iterable<T>) =>
+  _.reduce<T, string>((acc, cur) => `${acc}${sep}${cur}`, iter);
+
+console.log('join_string: ', join('-', iterable_string)); //  // join_string:  a-p-p-l-e
+console.log('join_array: ', join('-', iterable_array)); // join_array:  1-2-3
+// console.log('join_array_like: ', join('-', array_like)); // TypeError: iter is not iterable
+console.log('join_custom: ', join('-', iterable_custom)); // join_custom:  1-2-3-4-5-6-7-8-9
+console.log('join_map: ', join('-', iterable_map)); // join_map:  a,1-b,2-c,3
+console.log('join_set: ', join('-', iterable_set)); // join_set:  a-b-c
+console.log('join_arguments: ', join('-', iterable_arguments)); // join_arguments:  a-r-g-s
+console.log('join_generator: ', join('-', iterable_generator)); // join_generator:  1-2-3
+```
+
+여기서 구현한 join이 **다형성**이 높다는 의미는, 일관된 파라미터 인터페이스로 **다양한 형태**의 데이터에 대해 동작하는 것을 의미한다.
+즉 파라메트릭(매개변수) 다형성이라고 할 수 있다.
+
+이건 OOP에서 말하는 다형성과 비슷한 의미를 가진다.
+"어떤 부분이 다형성이라는 성질을 갖는지" 범주가 좀 다르다
+객체지향 프로그래밍에서는 주로 "포함 다형성(상속을 통한 서브타입 다형성)"과 "오버로딩 다형성"을 말한다.
+
+```ts
+class Animal {
+  name: string;
+  age: number;
+  speak() {
+    prompt('우우');
+  }
+  walk() {
+    prompt('터벅터벅');
+  }
+}
+
+class Dog extends Animal {
+  name: string;
+  speak() {
+    prompt('멍멍');
+  }
+}
+
+class Cat extends Animal {
+  name: string;
+  speak() {
+    prompt('야옹');
+  }
+}
+
+const cat = new Cat();
+cat.speak(); // 야옹 - 오버로딩Overloading 다형성
+cat.walk(); // 터벅터벅 - 포함Include 다형성
+```
