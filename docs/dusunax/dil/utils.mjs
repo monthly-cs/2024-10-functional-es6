@@ -77,6 +77,23 @@ const reduceCurry = curry((f, acc, iter) => {
   return acc;
 });
 
+const filterCurry = curry((f, iter) => {
+  if (!iter) {
+    return (...args) => filterCurry(f, ...args);
+  }
+  let res = [];
+  for (const a of iter) {
+    if (f(a)) {
+      res.push(a);
+    }
+  }
+  return res;
+});
+
+const join = curry((sep = ",", iter) =>
+  reduce((a, b) => `${a}${sep}${b}`, iter)
+);
+
 export {
   reduce,
   map,
@@ -90,4 +107,6 @@ export {
   add,
   mapCurry,
   reduceCurry,
+  join,
+  filterCurry,
 };
