@@ -93,3 +93,5 @@ console.log('join_map: ', join('-', iterable_map));
 console.log('join_set: ', join('-', iterable_set));
 console.log('join_arguments: ', join('-', iterable_arguments));
 console.log('join_generator: ', join('-', iterable_generator));
+
+// 위 join이 Array.prototype.join보다 유연한 이유: 파라메트릭 다형성을 가지기 때문이다.
