@@ -61,6 +61,10 @@ export const take = curry((l, iter) => {
 
 export const takeAll = take(Infinity);
 
+export const join = curry((sep = ",", iter) =>
+  reduce((a, b) => `${a}${sep}${b}`, iter)
+);
+
 export const L = {};
 
 L.range = function* (l) {
