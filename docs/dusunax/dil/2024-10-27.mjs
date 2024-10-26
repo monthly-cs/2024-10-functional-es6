@@ -182,7 +182,7 @@ async function f8(list) {
   }
 }
 // f8(["1", "2", "3", "5", "9"]).then((e) => log("f8 return:", e));
-// f8(["1", "2", "3", "{", "9"]).then((e) => log("f8 return:", e));
+f8(["1", "2", "3", "{", "9"]).then((e) => log("f8 return:", e));
 
 /**
  * 비동기 상황에서 파이프라인의 이점
@@ -194,7 +194,7 @@ async function f9(list) {
     return await go(
       list,
       // 엄격하게 평가하면? 에러가 발생
-      // 지연 평가하면? 에러 발생
+      // 지연 평가하면? 에러 발생하지 않음
       L.map((a) => new Promise((resolve) => resolve(JSON.parse(a)))),
       L.filter((a) => a % 2),
       take(2)
